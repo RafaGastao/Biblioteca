@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Empréstimos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-4">
+
+    <a href="/livros" class="btn btn-secondary mb-3">⬅ Voltar</a>
+
+    <h1 class="mb-4"> Empréstimos</h1>
+
+    <th:block th:if="${session.usuarioLogado.tipoUsuario == 'FUNCIONARIO'}">
+        <div class="card p-4 mb-4 shadow-sm">
+            <h5>Emprestar Livro</h5>
+
+            <form th:action="@{/emprestimos/realizar}" method="post">
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <select name="usuarioId" class="form-control">
+                            <option value="">Selecione o usuário</option>
+                            <option th:each="u : ${usuarios}" 
+                                    th:value="${u.id}" 
+                                    th:text="${u.nome}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col">
+                        <select name="livroId" class="form-control">
+                            <option value="">Selecione o livro</option>
+                            <option th:each="l : ${livros}" 
+                                    th:value="${l.id}" 
+                                    th:text="${l.titulo}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-success">Emprestar</button>
+            </form>
+        </div>
+    </th:block>
+
+    <h2>Lista de Empréstimos</h2>
+
+    <table class="table table-striped table-bordered shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Usuário</th>
+                <th>Livro</th>
+                <th>Retirada</th>
+                <th>Devolução</th>
+                <th>Status</th>
+                <th>Multa</th> 
+                <th>Ação</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="e : ${emprestimos}">
+                
+                <td th:text="${usuariosMap[e.usuarioId]}"></td>
+                <td th:text="${livrosMap[e.livroId]}"></td>
+
+                <td th:text="${e.dataRetirada}"></td>
+                <td th:text="${e.dataDevolucao}"></td>
+
+                <td>
+                    <span th:text="${e.situacao}"
+                          th:classappend="${e.situacao == 'ATRASADO'} ? 'text-danger fw-bold' :
+                                          (${e.situacao == 'DEVOLVIDO'} ? 'text-success fw-bold' :
+                                          'text-warning fw-bold')">
+                    </span>
+                </td>
+
+                <td>
+                    <span th:if="${e.multa > 0}" th:text="'R$ ' + ${e.multa}"></span>
+                    <span th:if="${e.multa == 0}" class="text-muted">-</span>
+                </td>
+
+                <td>
+                    <th:block th:if="
+                        ${e.situacao != 'DEVOLVIDO'} AND
+                        (
+                            ${session.usuarioLogado.tipoUsuario == 'FUNCIONARIO'} 
+                            or 
+                            ${e.usuarioId == session.usuarioLogado.id}
+                        )
+                    ">
+                        <form th:action="@{/emprestimos/devolver}" method="post">
+                            <input type="hidden" name="id" th:value="${e.id}">
+                            <button class="btn btn-danger btn-sm">Devolver</button>
+                        </form>
+                    </th:block>
+
+                    <span th:if="${e.situacao == 'DEVOLVIDO'}" class="text-muted">
+                        -
+                    </span>
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>

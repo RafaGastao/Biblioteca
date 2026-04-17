@@ -1,4 +1,3 @@
 target/
 
-# NÃO subir senha
 src/main/resources/application.properties

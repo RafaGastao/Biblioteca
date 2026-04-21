@@ -9,16 +9,16 @@
 
 <div class="container mt-4">
 
-    <a href="/livros" class="btn btn-secondary mb-3">⬅ Voltar</a>
+    <a th:href="${session.usuarioLogado.tipoUsuario == 'FUNCIONARIO'} ? '/admin' : '/livros'" 
+       class="btn btn-secondary mb-3">⬅ Voltar</a>
 
-    <h1 class="mb-4"> Empréstimos</h1>
+    <h1 class="mb-4">Empréstimos</h1>
 
     <th:block th:if="${session.usuarioLogado.tipoUsuario == 'FUNCIONARIO'}">
         <div class="card p-4 mb-4 shadow-sm">
             <h5>Emprestar Livro</h5>
 
             <form th:action="@{/emprestimos/realizar}" method="post">
-
                 <div class="row mb-3">
                     <div class="col">
                         <select name="usuarioId" class="form-control">
@@ -56,17 +56,15 @@
                 <th>Retirada</th>
                 <th>Devolução</th>
                 <th>Status</th>
-                <th>Multa</th> 
+                <th>Multa</th>
                 <th>Ação</th>
             </tr>
         </thead>
 
         <tbody>
             <tr th:each="e : ${emprestimos}">
-                
                 <td th:text="${usuariosMap[e.usuarioId]}"></td>
                 <td th:text="${livrosMap[e.livroId]}"></td>
-
                 <td th:text="${e.dataRetirada}"></td>
                 <td th:text="${e.dataDevolucao}"></td>
 
@@ -84,25 +82,15 @@
                 </td>
 
                 <td>
-                    <th:block th:if="
-                        ${e.situacao != 'DEVOLVIDO'} AND
-                        (
-                            ${session.usuarioLogado.tipoUsuario == 'FUNCIONARIO'} 
-                            or 
-                            ${e.usuarioId == session.usuarioLogado.id}
-                        )
-                    ">
+                    <th:block th:if="${e.situacao != 'DEVOLVIDO'} and (${session.usuarioLogado.tipoUsuario == 'FUNCIONARIO'} or ${e.usuarioId == session.usuarioLogado.id})">
                         <form th:action="@{/emprestimos/devolver}" method="post">
                             <input type="hidden" name="id" th:value="${e.id}">
                             <button class="btn btn-danger btn-sm">Devolver</button>
                         </form>
                     </th:block>
 
-                    <span th:if="${e.situacao == 'DEVOLVIDO'}" class="text-muted">
-                        -
-                    </span>
+                    <span th:if="${e.situacao == 'DEVOLVIDO'}" class="text-muted">-</span>
                 </td>
-
             </tr>
         </tbody>
     </table>

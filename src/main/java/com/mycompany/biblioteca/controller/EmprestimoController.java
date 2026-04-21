@@ -68,6 +68,7 @@ public class EmprestimoController {
 
    @PostMapping("/realizar")
 public String realizarEmprestimo(@RequestParam String livroId,
+                                 @RequestParam(required = false) String usuarioId,
                                  HttpSession session) {
 
     Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
@@ -76,7 +77,15 @@ public String realizarEmprestimo(@RequestParam String livroId,
         return "redirect:/login";
     }
 
-    emprestimoService.realizarEmprestimo(usuarioLogado.getId(), livroId);
+    if (usuarioLogado.getTipoUsuario().equals("FUNCIONARIO") 
+        && usuarioId != null && !usuarioId.isEmpty()) {
+
+        emprestimoService.realizarEmprestimo(usuarioId, livroId);
+
+    } else {
+
+        emprestimoService.realizarEmprestimo(usuarioLogado.getId(), livroId);
+    }
 
     return "redirect:/emprestimos";
 }
